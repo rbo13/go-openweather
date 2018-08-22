@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -93,8 +92,6 @@ func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 
 	r := bytes.NewBuffer(b)
 	err = json.NewDecoder(r).Decode(&weatherData)
-
-	log.Print(apiURL)
 
 	return &weatherData, nil
 }
