@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"time"
@@ -93,6 +94,30 @@ func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 	r := bytes.NewBuffer(b)
 	err = json.NewDecoder(r).Decode(&weatherData)
 
+	return &weatherData, nil
+}
+
+// GetWeatherByCityID returns the
+// weather in a given cityID
+func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
+	apiURL := fmt.Sprintf(baseURL+"?id=%d&appid=%s", cityID, c.apiKey)
+	var weatherData WeatherData
+
+	response, err := requestQuery().Get(apiURL)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	b, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	r := bytes.NewBuffer(b)
+	err = json.NewDecoder(r).Decode(&weatherData)
+	log.Print(apiURL)
 	return &weatherData, nil
 }
 
