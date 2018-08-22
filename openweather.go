@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -54,6 +53,12 @@ type WeatherData struct {
 	Cod  int    `json:"cod"`
 }
 
+// Coordinates defines the cordinates of a place
+type Coordinates struct {
+	latitude  float64
+	longitude float64
+}
+
 // Client represents
 // the client request to
 // openweather api
@@ -76,52 +81,38 @@ func NewClient(apiKey string) *Client {
 // weather in a given city
 func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 	apiURL := fmt.Sprintf(baseURL+"?q=%s&appid=%s", cityName, c.apiKey)
-	var weatherData WeatherData
-
-	response, err := requestQuery().Get(apiURL)
-	if err != nil {
-		return nil, err
-	}
-
-	defer response.Body.Close()
-
-	b, err := ioutil.ReadAll(response.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
-	r := bytes.NewBuffer(b)
-	err = json.NewDecoder(r).Decode(&weatherData)
-
-	return &weatherData, nil
+	return request("GET", apiURL)
 }
 
 // GetWeatherByCityID returns the
 // weather in a given cityID
 func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
 	apiURL := fmt.Sprintf(baseURL+"?id=%d&appid=%s", cityID, c.apiKey)
+	return request("GET", apiURL)
+}
+
+func request(method, url string) (*WeatherData, error) {
 	var weatherData WeatherData
 
-	response, err := requestQuery().Get(apiURL)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
+	client := buildHTTPClient()
 
-	b, err := ioutil.ReadAll(response.Body)
+	resp, err := buildHTTPRequest(method, url, client)
 
-	if err != nil {
+	if err != nil && resp == nil {
 		return nil, err
 	}
 
+	defer resp.Body.Close()
+
+	b, err := ioutil.ReadAll(resp.Body)
 	r := bytes.NewBuffer(b)
+
 	err = json.NewDecoder(r).Decode(&weatherData)
-	log.Print(apiURL)
+
 	return &weatherData, nil
 }
 
-func requestQuery() *http.Client {
+func buildHTTPClient() *http.Client {
 	var netTransport = &http.Transport{
 		Dial: (&net.Dialer{
 			Timeout: 5 * time.Second,
@@ -129,10 +120,21 @@ func requestQuery() *http.Client {
 		TLSHandshakeTimeout: 5 * time.Second,
 	}
 
-	var netClient = &http.Client{
+	client := &http.Client{
 		Timeout:   time.Second * 10,
 		Transport: netTransport,
 	}
 
-	return netClient
+	return client
+}
+
+func buildHTTPRequest(method, url string, client *http.Client) (*http.Response, error) {
+	request, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Accept", "application/json")
+
+	return client.Do(request)
 }
