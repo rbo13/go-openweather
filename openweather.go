@@ -36,7 +36,7 @@ type WeatherData struct {
 	} `json:"main"`
 	Wind struct {
 		Speed float64 `json:"speed"`
-		Deg   int     `json:"deg"`
+		Deg   float64 `json:"deg"`
 	} `json:"wind"`
 	Clouds struct {
 		All int `json:"all"`
@@ -55,8 +55,8 @@ type WeatherData struct {
 
 // Coordinates defines the cordinates of a place
 type Coordinates struct {
-	latitude  float64
-	longitude float64
+	Latitude  float64
+	Longitude float64
 }
 
 // Client represents
@@ -94,6 +94,19 @@ func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?id=%d&appid=%s", cityID, c.apiKey)
+	err := request("GET", apiURL, &weatherData)
+	if err != nil {
+		return nil, err
+	}
+	return &weatherData, nil
+}
+
+// GetWeatherByCoordinates returns the
+// weather by a given coordinates
+func (c *Client) GetWeatherByCoordinates(coords Coordinates) (*WeatherData, error) {
+	var weatherData WeatherData
+	apiURL := fmt.Sprintf(baseURL+"/weather?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, c.apiKey)
+
 	err := request("GET", apiURL, &weatherData)
 	if err != nil {
 		return nil, err
