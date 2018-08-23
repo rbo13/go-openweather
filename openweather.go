@@ -80,23 +80,10 @@ func NewClient(apiKey string) *Client {
 // GetWeatherByCityName returns the
 // weather in a given city
 func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
-	apiURL := fmt.Sprintf(baseURL+"?q=%s&appid=%s", cityName, c.apiKey)
-	return request("GET", apiURL)
-}
-
-// GetWeatherByCityID returns the
-// weather in a given cityID
-func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
-	apiURL := fmt.Sprintf(baseURL+"?id=%d&appid=%s", cityID, c.apiKey)
-	return request("GET", apiURL)
-}
-
-func request(method, url string) (*WeatherData, error) {
 	var weatherData WeatherData
+	apiURL := fmt.Sprintf(baseURL+"?q=%s&appid=%s", cityName, c.apiKey)
 
-	client := buildHTTPClient()
-
-	resp, err := buildHTTPRequest(method, url, client)
+	resp, err := request("GET", apiURL)
 
 	if err != nil && resp == nil {
 		return nil, err
@@ -104,12 +91,57 @@ func request(method, url string) (*WeatherData, error) {
 
 	defer resp.Body.Close()
 
-	b, err := ioutil.ReadAll(resp.Body)
-	r := bytes.NewBuffer(b)
-
-	err = json.NewDecoder(r).Decode(&weatherData)
+	err = processResponse(resp, &weatherData)
 
 	return &weatherData, nil
+}
+
+// GetWeatherByCityID returns the
+// weather in a given cityID
+func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
+	var weatherData WeatherData
+
+	apiURL := fmt.Sprintf(baseURL+"?id=%d&appid=%s", cityID, c.apiKey)
+	resp, err := request("GET", apiURL)
+
+	if err != nil && resp == nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	err = processResponse(resp, &weatherData)
+
+	return &weatherData, nil
+}
+
+func request(method, url string) (*http.Response, error) {
+	// var weatherData WeatherData
+
+	client := buildHTTPClient()
+
+	request, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Accept", "application/json")
+
+	return client.Do(request)
+
+	// resp, err := buildHTTPRequest(method, url, client)
+
+	// if err != nil && resp == nil {
+	// 	return nil, err
+	// }
+
+	// defer resp.Body.Close()
+
+	// b, err := ioutil.ReadAll(resp.Body)
+	// r := bytes.NewBuffer(b)
+
+	// err = json.NewDecoder(r).Decode(&weatherData)
+
+	// return &weatherData, nil
 }
 
 func buildHTTPClient() *http.Client {
@@ -137,4 +169,20 @@ func buildHTTPRequest(method, url string, client *http.Client) (*http.Response, 
 	request.Header.Set("Accept", "application/json")
 
 	return client.Do(request)
+}
+
+func processResponse(resp *http.Response, data interface{}) error {
+	b, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return err
+	}
+
+	buffer := bytes.NewBuffer(b)
+
+	if err != nil && buffer == nil {
+		return err
+	}
+
+	return json.NewDecoder(buffer).Decode(&data)
 }
