@@ -82,17 +82,10 @@ func NewClient(apiKey string) *Client {
 func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"?q=%s&appid=%s", cityName, c.apiKey)
-
-	resp, err := request("GET", apiURL)
-
-	if err != nil && resp == nil {
+	err := request("GET", apiURL, &weatherData)
+	if err != nil {
 		return nil, err
 	}
-
-	defer resp.Body.Close()
-
-	err = processResponse(resp, &weatherData)
-
 	return &weatherData, nil
 }
 
@@ -100,48 +93,28 @@ func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 // weather in a given cityID
 func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
 	var weatherData WeatherData
-
 	apiURL := fmt.Sprintf(baseURL+"?id=%d&appid=%s", cityID, c.apiKey)
-	resp, err := request("GET", apiURL)
-
-	if err != nil && resp == nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	err = processResponse(resp, &weatherData)
-
-	return &weatherData, nil
-}
-
-func request(method, url string) (*http.Response, error) {
-	// var weatherData WeatherData
-
-	client := buildHTTPClient()
-
-	request, err := http.NewRequest(method, url, nil)
-
+	err := request("GET", apiURL, &weatherData)
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Accept", "application/json")
+	return &weatherData, nil
+}
 
-	return client.Do(request)
+func request(method, url string, data interface{}) error {
+	client := buildHTTPClient()
 
-	// resp, err := buildHTTPRequest(method, url, client)
+	resp, err := buildHTTPRequest(method, url, client)
 
-	// if err != nil && resp == nil {
-	// 	return nil, err
-	// }
+	if err != nil && resp == nil {
+		return err
+	}
 
-	// defer resp.Body.Close()
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	r := bytes.NewBuffer(b)
 
-	// b, err := ioutil.ReadAll(resp.Body)
-	// r := bytes.NewBuffer(b)
-
-	// err = json.NewDecoder(r).Decode(&weatherData)
-
-	// return &weatherData, nil
+	return json.NewDecoder(r).Decode(&data)
 }
 
 func buildHTTPClient() *http.Client {
@@ -163,7 +136,7 @@ func buildHTTPClient() *http.Client {
 func buildHTTPRequest(method, url string, client *http.Client) (*http.Response, error) {
 	request, err := http.NewRequest(method, url, nil)
 
-	if err != nil {
+	if err != nil && request == nil {
 		return nil, err
 	}
 	request.Header.Set("Accept", "application/json")
