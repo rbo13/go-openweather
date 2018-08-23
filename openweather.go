@@ -66,7 +66,7 @@ type Client struct {
 	apiKey string
 }
 
-const baseURL string = "https://api.openweathermap.org/data/2.5/weather"
+const baseURL string = "https://api.openweathermap.org/data/2.5"
 
 // https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22
 
@@ -81,7 +81,7 @@ func NewClient(apiKey string) *Client {
 // weather in a given city
 func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 	var weatherData WeatherData
-	apiURL := fmt.Sprintf(baseURL+"?q=%s&appid=%s", cityName, c.apiKey)
+	apiURL := fmt.Sprintf(baseURL+"/weather?q=%s&appid=%s", cityName, c.apiKey)
 	err := request("GET", apiURL, &weatherData)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 // weather in a given cityID
 func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
 	var weatherData WeatherData
-	apiURL := fmt.Sprintf(baseURL+"?id=%d&appid=%s", cityID, c.apiKey)
+	apiURL := fmt.Sprintf(baseURL+"/weather?id=%d&appid=%s", cityID, c.apiKey)
 	err := request("GET", apiURL, &weatherData)
 	if err != nil {
 		return nil, err
