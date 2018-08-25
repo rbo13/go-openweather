@@ -1,7 +1,6 @@
 package openweather
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -130,9 +129,7 @@ func request(method, url string, data interface{}) error {
 		return err
 	}
 
-	r := bytes.NewBuffer(buffer)
-
-	return json.NewDecoder(r).Decode(&data)
+	return json.Unmarshal(buffer, &data)
 }
 
 func buildHTTPClient() *http.Client {
