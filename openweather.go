@@ -62,7 +62,8 @@ type Coordinates struct {
 // the client request to
 // openweather api
 type Client struct {
-	apiKey string
+	apiKey     string
+	httpClient *http.Client
 }
 
 const baseURL string = "https://api.openweathermap.org/data/2.5"
@@ -71,8 +72,19 @@ const baseURL string = "https://api.openweathermap.org/data/2.5"
 
 // NewClient returns the Client struct
 func NewClient(apiKey string) *Client {
+	var netTransport = &http.Transport{
+		Dial: (&net.Dialer{
+			Timeout: 5 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 5 * time.Second,
+	}
+
 	return &Client{
 		apiKey: apiKey,
+		httpClient: &http.Client{
+			Timeout:   10 * time.Second,
+			Transport: netTransport,
+		},
 	}
 }
 
@@ -81,7 +93,7 @@ func NewClient(apiKey string) *Client {
 func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?q=%s&appid=%s", cityName, c.apiKey)
-	err := request("GET", apiURL, &weatherData)
+	err := c.request("GET", apiURL, &weatherData)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +105,7 @@ func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?id=%d&appid=%s", cityID, c.apiKey)
-	err := request("GET", apiURL, &weatherData)
+	err := c.request("GET", apiURL, &weatherData)
 	if err != nil {
 		return nil, err
 	}
@@ -106,17 +118,16 @@ func (c *Client) GetWeatherByCoordinates(coords Coordinates) (*WeatherData, erro
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, c.apiKey)
 
-	err := request("GET", apiURL, &weatherData)
+	err := c.request("GET", apiURL, &weatherData)
 	if err != nil {
 		return nil, err
 	}
 	return &weatherData, nil
 }
 
-func request(method, url string, data interface{}) error {
-	client := buildHTTPClient()
+func (c *Client) request(method, url string, data interface{}) error {
 
-	resp, err := buildHTTPRequest(method, url, client)
+	resp, err := c.buildHTTPRequest(method, url)
 
 	if err != nil && resp.Body == nil {
 		return err
@@ -132,23 +143,7 @@ func request(method, url string, data interface{}) error {
 	return json.Unmarshal(buffer, &data)
 }
 
-func buildHTTPClient() *http.Client {
-	var netTransport = &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout: 5 * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout: 5 * time.Second,
-	}
-
-	client := &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: netTransport,
-	}
-
-	return client
-}
-
-func buildHTTPRequest(method, url string, client *http.Client) (*http.Response, error) {
+func (c *Client) buildHTTPRequest(method, url string) (*http.Response, error) {
 	request, err := http.NewRequest(method, url, nil)
 
 	if err != nil && request.Body == nil {
@@ -156,5 +151,5 @@ func buildHTTPRequest(method, url string, client *http.Client) (*http.Response, 
 	}
 	request.Header.Set("Accept", "application/json")
 
-	return client.Do(request)
+	return c.httpClient.Do(request)
 }
