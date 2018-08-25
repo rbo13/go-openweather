@@ -156,19 +156,3 @@ func buildHTTPRequest(method, url string, client *http.Client) (*http.Response, 
 
 	return client.Do(request)
 }
-
-func processResponse(resp *http.Response, data interface{}) error {
-	b, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		return err
-	}
-
-	buffer := bytes.NewBuffer(b)
-
-	if err != nil && buffer == nil {
-		return err
-	}
-
-	return json.NewDecoder(buffer).Decode(&data)
-}
