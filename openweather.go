@@ -143,22 +143,6 @@ func (c *Client) request(method, url string, data interface{}) error {
 	return json.Unmarshal(buffer, &data)
 }
 
-func buildHTTPClient() *http.Client {
-	var netTransport = &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout: 5 * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout: 5 * time.Second,
-	}
-
-	client := &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: netTransport,
-	}
-
-	return client
-}
-
 func (c *Client) buildHTTPRequest(method, url string) (*http.Response, error) {
 	request, err := http.NewRequest(method, url, nil)
 
