@@ -119,12 +119,17 @@ func request(method, url string, data interface{}) error {
 
 	resp, err := buildHTTPRequest(method, url, client)
 
-	if err != nil && resp == nil {
+	if err != nil && resp.Body == nil {
 		return err
 	}
 
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil && b == nil {
+		return err
+	}
+
 	r := bytes.NewBuffer(b)
 
 	return json.NewDecoder(r).Decode(&data)
@@ -149,7 +154,7 @@ func buildHTTPClient() *http.Client {
 func buildHTTPRequest(method, url string, client *http.Client) (*http.Response, error) {
 	request, err := http.NewRequest(method, url, nil)
 
-	if err != nil && request == nil {
+	if err != nil && request.Body == nil {
 		return nil, err
 	}
 	request.Header.Set("Accept", "application/json")
