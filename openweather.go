@@ -124,13 +124,13 @@ func request(method, url string, data interface{}) error {
 	}
 
 	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
+	buffer, err := ioutil.ReadAll(resp.Body)
 
-	if err != nil && b == nil {
+	if err != nil && buffer == nil {
 		return err
 	}
 
-	r := bytes.NewBuffer(b)
+	r := bytes.NewBuffer(buffer)
 
 	return json.NewDecoder(r).Decode(&data)
 }
