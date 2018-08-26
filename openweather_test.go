@@ -54,3 +54,19 @@ func TestGetByCoordinates(t *testing.T) {
 
 	t.Log(weatherData)
 }
+
+func TestGetByZipCode(t *testing.T) {
+	client := openweather.NewClient(apiKey)
+
+	weatherData, err := client.GetWeatherByZipCode("6000", "PH")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if weatherData == nil {
+		t.Error("Weather Data is nil")
+	}
+
+	t.Log(weatherData)
+}
