@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-// Coordinates defines the cordinates of a place
-type Coordinates struct {
-	Latitude  float64
-	Longitude float64
-}
-
 // Client represents
 // the client request to
 // openweather api
