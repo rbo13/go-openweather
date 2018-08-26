@@ -1,5 +1,5 @@
 ### GO-OPENWEATHER
-
+[![GoDoc](https://godoc.org/github.com/whaangbuu/go-openweather?status.svg)](https://godoc.org/github.com/whaangbuu/go-openweather)
 
 `go-openweather` is a library/wrapper for the [OpenWeather API](https://openweathermap.org/) that is written in [Go](https://golang.org/).
 
