@@ -76,6 +76,20 @@ func (c *Client) GetWeatherByCoordinates(coords Coordinates) (*WeatherData, erro
 	return &weatherData, nil
 }
 
+// GetWeatherByZipCode returns the
+// weather by a given zip code and country code
+func (c *Client) GetWeatherByZipCode(zipCode, countryCode string) (*WeatherData, error) {
+	var weatherData WeatherData
+	apiURL := fmt.Sprintf(baseURL+"/weather?zip=%s,%s&appid=%s", zipCode, countryCode, c.apiKey)
+
+	err := c.request("GET", apiURL, &weatherData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &weatherData, nil
+}
+
 func (c *Client) request(method, url string, data interface{}) error {
 
 	resp, err := c.buildHTTPRequest(method, url)
