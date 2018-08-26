@@ -19,8 +19,6 @@ type Client struct {
 
 const baseURL string = "https://api.openweathermap.org/data/2.5"
 
-// https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22
-
 // NewClient returns the Client struct
 func NewClient(apiKey string) *Client {
 	var netTransport = &http.Transport{
@@ -41,6 +39,7 @@ func NewClient(apiKey string) *Client {
 
 // GetWeatherByCityName returns the
 // weather in a given city
+// Sample: https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22
 func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?q=%s&appid=%s", cityName, c.apiKey)
@@ -53,6 +52,7 @@ func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
 
 // GetWeatherByCityID returns the
 // weather in a given cityID
+// Sample: https://samples.openweathermap.org/data/2.5/weather?id=2172797&appid=b6907d289e10d714a6e88b30761fae22
 func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?id=%d&appid=%s", cityID, c.apiKey)
@@ -65,6 +65,7 @@ func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
 
 // GetWeatherByCoordinates returns the
 // weather by a given coordinates
+// Sample: https://samples.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=b6907d289e10d714a6e88b30761fae22
 func (c *Client) GetWeatherByCoordinates(coords Coordinates) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, c.apiKey)
@@ -78,6 +79,7 @@ func (c *Client) GetWeatherByCoordinates(coords Coordinates) (*WeatherData, erro
 
 // GetWeatherByZipCode returns the
 // weather by a given zip code and country code
+// Sample: https://samples.openweathermap.org/data/2.5/weather?zip=94040,us&appid=b6907d289e10d714a6e88b30761fae22
 func (c *Client) GetWeatherByZipCode(zipCode, countryCode string) (*WeatherData, error) {
 	var weatherData WeatherData
 	apiURL := fmt.Sprintf(baseURL+"/weather?zip=%s,%s&appid=%s", zipCode, countryCode, c.apiKey)
