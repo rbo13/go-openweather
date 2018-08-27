@@ -110,6 +110,22 @@ func (c *Client) GetForecastByCityName(cityName string) (*ForecastData, error) {
 	return &forecastData, nil
 }
 
+// GetForecastByCityID returns the
+// forecast by a given city id
+// Sample: https://samples.openweathermap.org/data/2.5/forecast?id=524901&appid=b6907d289e10d714a6e88b30761fae22
+func (c *Client) GetForecastByCityID(cityID string) (*ForecastData, error) {
+	var forecastData ForecastData
+	apiURL := fmt.Sprintf(baseURL+"/forecast?id=%s&appid=%s", cityID, c.apiKey)
+
+	err := c.request("GET", apiURL, &forecastData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &forecastData, nil
+}
+
 func (c *Client) request(method, url string, data interface{}) error {
 
 	resp, err := c.buildHTTPRequest(method, url)
