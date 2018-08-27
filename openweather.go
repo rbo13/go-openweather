@@ -78,7 +78,9 @@ func (c *Client) GetWeatherByCoordinates(coords Coordinates) (*WeatherData, erro
 }
 
 // GetWeatherByZipCode returns the
-// weather by a given zip code and country code
+// weather by a given zip code and country code.
+// If `countryCode` is not specified, it defaults to 'US',
+// see: https://openweathermap.org/current#zip
 // Sample: https://samples.openweathermap.org/data/2.5/weather?zip=94040,us&appid=b6907d289e10d714a6e88b30761fae22
 func (c *Client) GetWeatherByZipCode(zipCode, countryCode string) (*WeatherData, error) {
 	var weatherData WeatherData
