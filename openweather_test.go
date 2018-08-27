@@ -19,7 +19,7 @@ func TestGetByCityName(t *testing.T) {
 	}
 
 	if weatherData == nil {
-		t.Errorf("Weather Data is nil")
+		t.Error("Weather Data is nil")
 	}
 
 	t.Log(weatherData)
@@ -34,7 +34,7 @@ func TestGetByCityID(t *testing.T) {
 	}
 
 	if weatherData == nil {
-		t.Errorf("Weather Data is nil")
+		t.Error("Weather Data is nil")
 	}
 
 	t.Log(weatherData)
@@ -49,7 +49,7 @@ func TestGetByCoordinates(t *testing.T) {
 	}
 
 	if weatherData == nil {
-		t.Errorf("Weather Data is nil")
+		t.Error("Weather Data is nil")
 	}
 
 	t.Log(weatherData)
@@ -69,4 +69,20 @@ func TestGetByZipCode(t *testing.T) {
 	}
 
 	t.Log(weatherData)
+}
+
+func TestGetForecastByCityName(t *testing.T) {
+	client := openweather.NewClient(apiKey)
+
+	forecastData, err := client.GetForecastByCityName("Cebu City")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if forecastData == nil {
+		t.Error("Forecast Data is nil")
+	}
+
+	t.Log(forecastData)
 }
