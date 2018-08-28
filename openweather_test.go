@@ -102,3 +102,19 @@ func TestGetForecastByCityID(t *testing.T) {
 
 	t.Log(forecastData)
 }
+
+func TestGetForecastByCoordinates(t *testing.T) {
+	client := openweather.NewClient(apiKey)
+
+	forecastData, err := client.GetForecastByCoordinates(openweather.Coordinates{Latitude: 35, Longitude: 139})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if forecastData == nil {
+		t.Error("Forecast Data is nil")
+	}
+
+	t.Log(forecastData)
+}

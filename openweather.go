@@ -126,6 +126,21 @@ func (c *Client) GetForecastByCityID(cityID string) (*ForecastData, error) {
 	return &forecastData, nil
 }
 
+// GetForecastByCoordinates returns the
+// forecast by a given coordinates
+// Sample: https://samples.openweathermap.org/data/2.5/forecast?lat=35&lon=139&appid=b6907d289e10d714a6e88b30761fae22
+func (c *Client) GetForecastByCoordinates(coords Coordinates) (*ForecastData, error) {
+	var forecastData ForecastData
+	apiURL := fmt.Sprintf(baseURL+"/forecast?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, c.apiKey)
+
+	err := c.request("GET", apiURL, &forecastData)
+
+	if err != nil {
+		return nil, err
+	}
+	return &forecastData, nil
+}
+
 func (c *Client) request(method, url string, data interface{}) error {
 
 	resp, err := c.buildHTTPRequest(method, url)
