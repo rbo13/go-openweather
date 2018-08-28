@@ -8,8 +8,8 @@
 
 Has the basic access to the OpenWeather API:
 
-  - Get the weather by City name, City ID, Coordinates, Zip Code
-  - Get the Forecast ( Work-in Progress ) 
+  - Get the weather by City name, City ID, Coordinates, Zip Code;
+  - Get Forecast Data
 
 
 # Installation:
@@ -29,7 +29,7 @@ log.Print(weatherData)
 ```
 
 # TODO:
- - [ ] Get Forecast Data
+ - [x] Get Forecast Data
  - [ ] Add more test
 
  # LICENSE:
