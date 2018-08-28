@@ -141,6 +141,25 @@ func (c *Client) GetForecastByCoordinates(coords Coordinates) (*ForecastData, er
 	return &forecastData, nil
 }
 
+// GetForecastByZipCode returns the
+// forecast by a given zip code and country code.
+// If country code is not specied, it defaults to 'USA',
+// for reference, see: https://openweathermap.org/forecast5#zip
+// Sample: https://samples.openweathermap.org/data/2.5/forecast?zip=94040&appid=b6907d289e10d714a6e88b30761fae22
+
+func (c *Client) GetForecastByZipCode(zipCode, countryCode string) (*ForecastData, error) {
+	var forecastData ForecastData
+	apiURL := fmt.Sprintf(baseURL+"/forecast?zip=%s,%s&appid=%s", zipCode, countryCode, c.apiKey)
+
+	err := c.request("GET", apiURL, &forecastData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &forecastData, nil
+}
+
 func (c *Client) request(method, url string, data interface{}) error {
 
 	resp, err := c.buildHTTPRequest(method, url)
