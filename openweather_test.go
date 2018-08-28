@@ -118,3 +118,19 @@ func TestGetForecastByCoordinates(t *testing.T) {
 
 	t.Log(forecastData)
 }
+
+func TestGetForecastByZipCode(t *testing.T) {
+	client := openweather.NewClient(apiKey)
+
+	forecastData, err := client.GetForecastByZipCode("6000", "PH")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if forecastData == nil {
+		t.Error("Forecast Data is nil")
+	}
+
+	t.Log(forecastData)
+}
