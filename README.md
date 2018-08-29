@@ -14,7 +14,7 @@ Has the basic access to the OpenWeather API:
 
 # Installation:
 ```sh
-$ go get -u github.com/whaangbuu/go-openweather
+$ go get -u github.com/rbo13/go-openweather
 ```
 
 # How to use:
