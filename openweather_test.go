@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	openweather "github.com/whaangbuu/go-openweather"
+	openweather "github.com/rbo13/go-openweather"
 )
 
 var apiKey string = os.Getenv("OPENWEATHER_API_KEY")
