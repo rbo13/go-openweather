@@ -150,3 +150,19 @@ func TestGetDailyForecastByCityName(t *testing.T) {
 
 	t.Log(dailyForecastData)
 }
+
+func TestGetDailyForecastByCityID(t *testing.T) {
+	client := openweather.NewClient(apiKey)
+
+	dailyForecastData, err := client.GetDailyForecastByCityID("524901", "7")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if dailyForecastData == nil {
+		t.Error("Daily Forecast Data is nil")
+	}
+
+	t.Log(dailyForecastData)
+}

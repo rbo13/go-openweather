@@ -187,6 +187,28 @@ func (c *Client) GetDailyForecastByCityName(cityName, unit, count string) (*Dail
 	return &dailyForecastData, nil
 }
 
+// GetDailyForecastByCityID returns the
+// daily forecast by a given city id and count/frequency
+// of the forecast. Sets default value to count if
+// none is specified.
+func (c *Client) GetDailyForecastByCityID(cityID, count string) (*DailyForecastData, error) {
+	var dailyForecastData DailyForecastData
+
+	if count == "" {
+		count = "7" // defaults to 7 days of forecast
+	}
+
+	apiURL := fmt.Sprintf(baseURL+"/forecast/daily?id=%s&cnt=%s&appid=%s", cityID, count, c.apiKey)
+
+	err := c.request("GET", apiURL, &dailyForecastData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &dailyForecastData, nil
+}
+
 func (c *Client) request(method, url string, data interface{}) error {
 
 	resp, err := c.buildHTTPRequest(method, url)
