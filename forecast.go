@@ -52,3 +52,42 @@ type ForecastData struct {
 		Country string `json:"country"`
 	} `json:"city"`
 }
+
+type DailyForecastData struct {
+	Cod     string  `json:"cod"`
+	Message float64 `json:"message"`
+	City    struct {
+		GeonameID  int     `json:"geoname_id"`
+		Name       string  `json:"name"`
+		Lat        float64 `json:"lat"`
+		Lon        float64 `json:"lon"`
+		Country    string  `json:"country"`
+		Iso2       string  `json:"iso2"`
+		Type       string  `json:"type"`
+		Population int     `json:"population"`
+	} `json:"city"`
+	Cnt  int `json:"cnt"`
+	List []struct {
+		Dt   int `json:"dt"`
+		Temp struct {
+			Day   float64 `json:"day"`
+			Min   float64 `json:"min"`
+			Max   float64 `json:"max"`
+			Night float64 `json:"night"`
+			Eve   float64 `json:"eve"`
+			Morn  float64 `json:"morn"`
+		} `json:"temp"`
+		Pressure float64 `json:"pressure"`
+		Humidity int     `json:"humidity"`
+		Weather  []struct {
+			ID          int    `json:"id"`
+			Main        string `json:"main"`
+			Description string `json:"description"`
+			Icon        string `json:"icon"`
+		} `json:"weather"`
+		Speed  float64 `json:"speed"`
+		Deg    int     `json:"deg"`
+		Clouds int     `json:"clouds"`
+		Snow   float64 `json:"snow,omitempty"`
+	} `json:"list"`
+}
