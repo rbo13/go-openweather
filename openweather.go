@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -17,10 +18,23 @@ type Client struct {
 	httpClient *http.Client
 }
 
+// Weather ...
+type Weather struct {
+	Client
+	Url         string
+	WeatherData *WeatherData
+}
+
+// Forecast ...
+type Forecast struct {
+	Client
+	Url          string
+	ForecastData *ForecastData
+}
+
 const baseURL string = "https://api.openweathermap.org/data/2.5"
 
-// NewClient returns the Client struct
-func NewClient(apiKey string) *Client {
+func NewWeather(baseUrl string) *Weather {
 	var netTransport = &http.Transport{
 		Dial: (&net.Dialer{
 			Timeout: 5 * time.Second,
@@ -28,117 +42,119 @@ func NewClient(apiKey string) *Client {
 		TLSHandshakeTimeout: 5 * time.Second,
 	}
 
-	return &Client{
-		apiKey: apiKey,
-		httpClient: &http.Client{
-			Timeout:   10 * time.Second,
-			Transport: netTransport,
+	return &Weather{
+		Client: Client{
+			apiKey: os.Getenv("OPENWEATHER_API_KEY"),
+			httpClient: &http.Client{
+				Timeout:   10 * time.Second,
+				Transport: netTransport,
+			},
 		},
+		Url:         baseUrl,
+		WeatherData: new(WeatherData),
 	}
 }
 
-// GetWeatherByCityName returns the
-// weather in a given city
-// Sample: https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22
-func (c *Client) GetWeatherByCityName(cityName string) (*WeatherData, error) {
-	var weatherData WeatherData
-	apiURL := fmt.Sprintf(baseURL+"/weather?q=%s&appid=%s", cityName, c.apiKey)
-	err := c.request("GET", apiURL, &weatherData)
+func NewForecast(baseUrl string) *Forecast {
+	var netTransport = &http.Transport{
+		Dial: (&net.Dialer{
+			Timeout: 5 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 5 * time.Second,
+	}
+
+	return &Forecast{
+		Client: Client{
+			apiKey: os.Getenv("OPENWEATHER_API_KEY"),
+			httpClient: &http.Client{
+				Timeout:   10 * time.Second,
+				Transport: netTransport,
+			},
+		},
+		Url:          baseUrl,
+		ForecastData: new(ForecastData),
+	}
+}
+
+func (w *Weather) GetByCityName(cityName string) (*WeatherData, error) {
+	apiUrl := fmt.Sprintf(w.Url+"/weather?q=%s&appid=%s", cityName, w.Client.apiKey)
+	err := w.Client.request("GET", apiUrl, &w.WeatherData)
+
 	if err != nil {
 		return nil, err
 	}
-	return &weatherData, nil
+	return w.WeatherData, nil
 }
 
-// GetWeatherByCityID returns the
-// weather in a given cityID
-// Sample: https://samples.openweathermap.org/data/2.5/weather?id=2172797&appid=b6907d289e10d714a6e88b30761fae22
-func (c *Client) GetWeatherByCityID(cityID int64) (*WeatherData, error) {
-	var weatherData WeatherData
-	apiURL := fmt.Sprintf(baseURL+"/weather?id=%d&appid=%s", cityID, c.apiKey)
-	err := c.request("GET", apiURL, &weatherData)
+func (w *Weather) GetByCityID(cityID int64) (*WeatherData, error) {
+	apiUrl := fmt.Sprintf(w.Url+"/weather?id=%d&appid=%s", cityID, w.Client.apiKey)
+	err := w.Client.request("GET", apiUrl, &w.WeatherData)
+
 	if err != nil {
 		return nil, err
 	}
-	return &weatherData, nil
+	return w.WeatherData, nil
 }
 
-// GetWeatherByCoordinates returns the
-// weather by a given coordinates
-// Sample: https://samples.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=b6907d289e10d714a6e88b30761fae22
-func (c *Client) GetWeatherByCoordinates(coords Coordinates) (*WeatherData, error) {
-	var weatherData WeatherData
-	apiURL := fmt.Sprintf(baseURL+"/weather?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, c.apiKey)
-
-	err := c.request("GET", apiURL, &weatherData)
-	if err != nil {
-		return nil, err
-	}
-	return &weatherData, nil
-}
-
-// GetWeatherByZipCode returns the
-// weather by a given zip code and country code.
-// If `countryCode` is not specified, it defaults to 'US',
-// see: https://openweathermap.org/current#zip
-// Sample: https://samples.openweathermap.org/data/2.5/weather?zip=94040,us&appid=b6907d289e10d714a6e88b30761fae22
-func (c *Client) GetWeatherByZipCode(zipCode, countryCode string) (*WeatherData, error) {
-	var weatherData WeatherData
-	apiURL := fmt.Sprintf(baseURL+"/weather?zip=%s,%s&appid=%s", zipCode, countryCode, c.apiKey)
-
-	err := c.request("GET", apiURL, &weatherData)
-	if err != nil {
-		return nil, err
-	}
-
-	return &weatherData, nil
-}
-
-// GetForecastByCityName returns the
-// forecast by a given city
-// Sample: https://samples.openweathermap.org/data/2.5/forecast?q=London,us&appid=b6907d289e10d714a6e88b30761fae22
-func (c *Client) GetForecastByCityName(cityName string) (*ForecastData, error) {
-	var forecastData ForecastData
-	apiURL := fmt.Sprintf(baseURL+"/forecast?q=%s&appid=%s", cityName, c.apiKey)
-
-	err := c.request("GET", apiURL, &forecastData)
+func (w *Weather) GetByCoordinates(coords Coordinates) (*WeatherData, error) {
+	apiUrl := fmt.Sprintf(w.Url+"/weather?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, w.Client.apiKey)
+	err := w.Client.request("GET", apiUrl, &w.WeatherData)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &forecastData, nil
+	return w.WeatherData, nil
 }
 
-// GetForecastByCityID returns the
-// forecast by a given city id
-// Sample: https://samples.openweathermap.org/data/2.5/forecast?id=524901&appid=b6907d289e10d714a6e88b30761fae22
-func (c *Client) GetForecastByCityID(cityID string) (*ForecastData, error) {
-	var forecastData ForecastData
-	apiURL := fmt.Sprintf(baseURL+"/forecast?id=%s&appid=%s", cityID, c.apiKey)
-
-	err := c.request("GET", apiURL, &forecastData)
+func (w *Weather) GetByZipCode(zipCode, countryCode string) (*WeatherData, error) {
+	apiUrl := fmt.Sprintf(w.Url+"/weather?zip=%s,%s&appid=%s", zipCode, countryCode, w.Client.apiKey)
+	err := w.Client.request("GET", apiUrl, &w.WeatherData)
 
 	if err != nil {
 		return nil, err
 	}
-
-	return &forecastData, nil
+	return w.WeatherData, nil
 }
 
-// GetForecastByCoordinates returns the
-// forecast by a given coordinates
-// Sample: https://samples.openweathermap.org/data/2.5/forecast?lat=35&lon=139&appid=b6907d289e10d714a6e88b30761fae22
-func (c *Client) GetForecastByCoordinates(coords Coordinates) (*ForecastData, error) {
-	var forecastData ForecastData
-	apiURL := fmt.Sprintf(baseURL+"/forecast?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, c.apiKey)
-
-	err := c.request("GET", apiURL, &forecastData)
+func (f *Forecast) GetByCityName(cityName string) (*ForecastData, error) {
+	apiUrl := fmt.Sprintf(f.Url+"/forecast?q=%s&appid=%s", cityName, f.Client.apiKey)
+	err := f.Client.request("GET", apiUrl, &f.ForecastData)
 
 	if err != nil {
 		return nil, err
 	}
-	return &forecastData, nil
+	return f.ForecastData, nil
+}
+
+func (f *Forecast) GetByCityID(cityID int64) (*ForecastData, error) {
+	apiUrl := fmt.Sprintf(f.Url+"/forecast?id=%d&appid=%s", cityID, f.Client.apiKey)
+	err := f.Client.request("GET", apiUrl, &f.ForecastData)
+
+	if err != nil {
+		return nil, err
+	}
+	return f.ForecastData, nil
+}
+
+func (f *Forecast) GetByCoordinates(coords Coordinates) (*ForecastData, error) {
+	apiUrl := fmt.Sprintf(f.Url+"/forecast?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, f.Client.apiKey)
+	err := f.Client.request("GET", apiUrl, &f.ForecastData)
+
+	if err != nil {
+		return nil, err
+	}
+	return f.ForecastData, nil
+}
+
+func (f *Forecast) GetByZipCode(zipCode, countryCode string) (*ForecastData, error) {
+	apiUrl := fmt.Sprintf(f.Url+"/forecast?zip=%s,%s&appid=%s", zipCode, countryCode, f.Client.apiKey)
+	err := f.Client.request("GET", apiUrl, &f.ForecastData)
+
+	if err != nil {
+		return nil, err
+	}
+	return f.ForecastData, nil
 }
 
 // GetForecastByZipCode returns the
@@ -158,55 +174,6 @@ func (c *Client) GetForecastByZipCode(zipCode, countryCode string) (*ForecastDat
 	}
 
 	return &forecastData, nil
-}
-
-// GetDailyForecastByCityName returns the
-// daily forecast by a given city name, unit
-// and count/frequency of the forecast.
-// Sets default value for unit and count if
-// none is specified.
-func (c *Client) GetDailyForecastByCityName(cityName, unit, count string) (*DailyForecastData, error) {
-	var dailyForecastData DailyForecastData
-
-	if unit == "" {
-		unit = "metric"
-	}
-
-	if count == "" {
-		count = "7" // defaults to 7 days of forecast
-	}
-
-	apiURL := fmt.Sprintf(baseURL+"/forecast/daily?q=%s&units=%s&cnt=%s&appid=%s", cityName, unit, count, c.apiKey)
-
-	err := c.request("GET", apiURL, &dailyForecastData)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &dailyForecastData, nil
-}
-
-// GetDailyForecastByCityID returns the
-// daily forecast by a given city id and count/frequency
-// of the forecast. Sets default value to count if
-// none is specified.
-func (c *Client) GetDailyForecastByCityID(cityID, count string) (*DailyForecastData, error) {
-	var dailyForecastData DailyForecastData
-
-	if count == "" {
-		count = "7" // defaults to 7 days of forecast
-	}
-
-	apiURL := fmt.Sprintf(baseURL+"/forecast/daily?id=%s&cnt=%s&appid=%s", cityID, count, c.apiKey)
-
-	err := c.request("GET", apiURL, &dailyForecastData)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &dailyForecastData, nil
 }
 
 func (c *Client) request(method, url string, data interface{}) error {
