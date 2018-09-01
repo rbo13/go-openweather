@@ -138,7 +138,7 @@ func TestGetForecastByZipCode(t *testing.T) {
 func TestGetDailyForecastByCityName(t *testing.T) {
 	client := openweather.NewClient(apiKey)
 
-	dailyForecastData, err := client.GetDailyForecastByCityName("London", "metric", "7")
+	dailyForecastData, err := client.GetDailyForecastByCityName("Cebu City", "", "")
 
 	if err != nil {
 		t.Error(err)
