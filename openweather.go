@@ -161,7 +161,8 @@ func (c *Client) GetForecastByZipCode(zipCode, countryCode string) (*ForecastDat
 }
 
 // GetDailyForecastByCityName returns the
-// daily forecast by a given city name.
+// daily forecast by a given city name, unit
+// and count/frequency of the forecast.
 func (c *Client) GetDailyForecastByCityName(cityName, unit, count string) (*DailyForecastData, error) {
 	var dailyForecastData DailyForecastData
 	apiURL := fmt.Sprintf(baseURL+"/forecast/daily?q=%s&units=%s&cnt=%s&appid=%s", cityName, unit, count, c.apiKey)
