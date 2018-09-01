@@ -5,30 +5,44 @@ import (
 	"testing"
 
 	openweather "github.com/rbo13/go-openweather"
+	"github.com/rbo13/go-openweather/coords"
+	"github.com/rbo13/go-openweather/forecast"
+
+	"github.com/rbo13/go-openweather/weather"
 )
 
 var apiKey string = os.Getenv("OPENWEATHER_API_KEY")
 
 const baseURL string = "https://api.openweathermap.org/data/2.5"
 
-var weather *openweather.Weather
-var forecast *openweather.Forecast
+var w *weather.Weather
+var f *forecast.Forecast
 
 func init() {
-	weather = openweather.NewWeather(baseURL)
-	forecast = openweather.NewForecast(baseURL)
+	w = weather.NewWeather(baseURL)
+	f = forecast.NewForecast(baseURL)
 }
 
 func TestGetByCityName(t *testing.T) {
-	weatherData, err := weather.GetByCityName("Cebu City")
-	forecastData, err := forecast.GetByCityName("Cebu City")
+	openweather := openweather.New(w, f)
+
+	weatherData, err := openweather.Weatherer.GetByCityName("Cebu City")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if weatherData == nil {
+		t.Error("Weather is nil")
+	}
+
+	forecastData, err := openweather.Forecaster.GetByCityName("Cebu City")
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if weatherData == nil || forecastData == nil {
-		t.Error("ERROR")
+	if forecastData == nil {
+		t.Error("Forecast is nil")
 	}
 
 	t.Log(weatherData)
@@ -36,8 +50,8 @@ func TestGetByCityName(t *testing.T) {
 }
 
 func TestGetByCityID(t *testing.T) {
-	weatherData, err := weather.GetByCityID(2172797)
-	forecastData, err := forecast.GetByCityID(2172797)
+	weatherData, err := w.GetByCityID(2172797)
+	forecastData, err := f.GetByCityID(2172797)
 
 	if err != nil {
 		t.Error(err)
@@ -52,8 +66,8 @@ func TestGetByCityID(t *testing.T) {
 }
 
 func TestGetByCoordinates(t *testing.T) {
-	weatherData, err := weather.GetByCoordinates(openweather.Coordinates{Latitude: 10.3157, Longitude: 123.885})
-	forecastData, err := forecast.GetByCoordinates(openweather.Coordinates{Latitude: 10.3157, Longitude: 123.885})
+	weatherData, err := w.GetByCoordinates(coords.Coordinates{Latitude: 10.3157, Longitude: 123.885})
+	forecastData, err := f.GetByCoordinates(coords.Coordinates{Latitude: 10.3157, Longitude: 123.885})
 
 	if err != nil {
 		t.Error(err)
@@ -68,8 +82,8 @@ func TestGetByCoordinates(t *testing.T) {
 }
 
 func TestByZipCode(t *testing.T) {
-	weatherData, err := weather.GetByZipCode("6000", "PH")
-	forecastData, err := forecast.GetByZipCode("6000", "PH")
+	weatherData, err := w.GetByZipCode("6000", "PH")
+	forecastData, err := f.GetByZipCode("6000", "PH")
 
 	if err != nil {
 		t.Error(err)

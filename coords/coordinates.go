@@ -1,4 +1,4 @@
-package openweather
+package coords
 
 // Coordinates defines the cordinates of a place
 type Coordinates struct {
