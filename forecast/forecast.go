@@ -2,11 +2,11 @@ package forecast
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"time"
 
+	openweather "github.com/rbo13/go-openweather"
 	"github.com/rbo13/go-openweather/client"
 	"github.com/rbo13/go-openweather/coords"
 )
@@ -111,20 +111,13 @@ type Forecast struct {
 }
 
 // NewForecast ...
-func NewForecast(baseURL string) *Forecast {
-	var netTransport = &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout: 5 * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout: 5 * time.Second,
-	}
-
+func NewForecast(baseURL string, transport *http.Transport) *Forecast {
 	return &Forecast{
 		Client: client.Client{
 			APIKey: os.Getenv("OPENWEATHER_API_KEY"),
 			HTTPClient: &http.Client{
 				Timeout:   10 * time.Second,
-				Transport: netTransport,
+				Transport: transport,
 			},
 		},
 		URL:          baseURL,
@@ -132,42 +125,53 @@ func NewForecast(baseURL string) *Forecast {
 	}
 }
 
-func (f *Forecast) GetByCityName(cityName string) (*ForecastData, error) {
+// GetByCityName ...
+func (f *Forecast) GetByCityName(cityName string) (*openweather.Openweather, error) {
 	apiURL := fmt.Sprintf(f.URL+"/forecast?q=%s&appid=%s", cityName, f.Client.APIKey)
 	err := f.Client.Request("GET", apiURL, &f.ForecastData)
-
 	if err != nil {
 		return nil, err
 	}
-	return f.ForecastData, nil
+
+	return &openweather.Openweather{
+		WeatherForecaster: f,
+	}, nil
 }
 
-func (f *Forecast) GetByCityID(cityID int64) (*ForecastData, error) {
+// GetByCityID ...
+func (f *Forecast) GetByCityID(cityID int64) (*openweather.Openweather, error) {
 	apiURL := fmt.Sprintf(f.URL+"/forecast?id=%d&appid=%s", cityID, f.Client.APIKey)
 	err := f.Client.Request("GET", apiURL, &f.ForecastData)
-
 	if err != nil {
 		return nil, err
 	}
-	return f.ForecastData, nil
+
+	return &openweather.Openweather{
+		WeatherForecaster: f,
+	}, nil
 }
 
-func (f *Forecast) GetByCoordinates(coords coords.Coordinates) (*ForecastData, error) {
+// GetByCoordinates ...
+func (f *Forecast) GetByCoordinates(coords coords.Coordinates) (*openweather.Openweather, error) {
 	apiURL := fmt.Sprintf(f.URL+"/forecast?lat=%g&lon=%g&appid=%s", coords.Latitude, coords.Longitude, f.Client.APIKey)
 	err := f.Client.Request("GET", apiURL, &f.ForecastData)
-
 	if err != nil {
 		return nil, err
 	}
-	return f.ForecastData, nil
+
+	return &openweather.Openweather{
+		WeatherForecaster: f,
+	}, nil
 }
 
-func (f *Forecast) GetByZipCode(zipCode, countryCode string) (*ForecastData, error) {
+// GetByZipCode ...
+func (f *Forecast) GetByZipCode(zipCode, countryCode string) (*openweather.Openweather, error) {
 	apiURL := fmt.Sprintf(f.URL+"/forecast?zip=%s,%s&appid=%s", zipCode, countryCode, f.Client.APIKey)
 	err := f.Client.Request("GET", apiURL, &f.ForecastData)
-
 	if err != nil {
 		return nil, err
 	}
-	return f.ForecastData, nil
+	return &openweather.Openweather{
+		WeatherForecaster: f,
+	}, nil
 }

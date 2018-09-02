@@ -1,10 +1,12 @@
 package openweather_test
 
 import (
+	"net"
+	"net/http"
 	"os"
 	"testing"
+	"time"
 
-	openweather "github.com/rbo13/go-openweather"
 	"github.com/rbo13/go-openweather/coords"
 	"github.com/rbo13/go-openweather/forecast"
 
@@ -18,81 +20,78 @@ const baseURL string = "https://api.openweathermap.org/data/2.5"
 var w *weather.Weather
 var f *forecast.Forecast
 
+var netTransport = &http.Transport{
+	Dial: (&net.Dialer{
+		Timeout: 5 * time.Second,
+	}).Dial,
+	TLSHandshakeTimeout: 5 * time.Second,
+}
+
 func init() {
-	w = weather.NewWeather(baseURL)
-	f = forecast.NewForecast(baseURL)
+	w = weather.NewWeather(baseURL, netTransport)
+	f = forecast.NewForecast(baseURL, netTransport)
 }
 
 func TestGetByCityName(t *testing.T) {
-	openweather := openweather.New(w, f)
-
-	weatherData, err := openweather.Weatherer.GetByCityName("Cebu City")
-	if err != nil {
-		t.Error(err)
-	}
-
-	if weatherData == nil {
-		t.Error("Weather is nil")
-	}
-
-	forecastData, err := openweather.Forecaster.GetByCityName("Cebu City")
+	openweatherData, err := w.GetByCityName("Cebu City")
+	forecast, err := f.GetByCityName("Cebu City")
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if forecastData == nil {
-		t.Error("Forecast is nil")
+	if openweatherData == nil || forecast == nil {
+		t.Error("Must not be nil")
 	}
 
-	t.Log(weatherData)
-	t.Log(forecastData)
+	t.Log(w.WeatherData)
+	t.Log(f.ForecastData)
 }
 
 func TestGetByCityID(t *testing.T) {
-	weatherData, err := w.GetByCityID(2172797)
-	forecastData, err := f.GetByCityID(2172797)
+	openweatherData, err := w.GetByCityID(2172797)
+	forecast, err := f.GetByCityID(2172797)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if weatherData == nil || forecastData == nil {
-		t.Error("Weather Data is nil")
+	if openweatherData == nil || forecast == nil {
+		t.Error("Must not be nil")
 	}
 
-	t.Log(weatherData)
-	t.Log(forecastData)
+	t.Log(w.WeatherData)
+	t.Log(f.ForecastData)
 }
 
 func TestGetByCoordinates(t *testing.T) {
-	weatherData, err := w.GetByCoordinates(coords.Coordinates{Latitude: 10.3157, Longitude: 123.885})
-	forecastData, err := f.GetByCoordinates(coords.Coordinates{Latitude: 10.3157, Longitude: 123.885})
+	openweatherData, err := w.GetByCoordinates(coords.Coordinates{Latitude: 10.3157, Longitude: 123.885})
+	forecast, err := f.GetByCoordinates(coords.Coordinates{Latitude: 10.3157, Longitude: 123.885})
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if weatherData == nil || forecastData == nil {
-		t.Error("ERROR")
+	if openweatherData == nil || forecast == nil {
+		t.Error("Must not be nil")
 	}
 
-	t.Log(weatherData)
-	t.Log(forecastData)
+	t.Log(w.WeatherData)
+	t.Log(f.ForecastData)
 }
 
-func TestByZipCode(t *testing.T) {
-	weatherData, err := w.GetByZipCode("6000", "PH")
-	forecastData, err := f.GetByZipCode("6000", "PH")
+func TestGetByZipCode(t *testing.T) {
+	openweatherData, err := w.GetByZipCode("6000", "PH")
+	forecast, err := f.GetByZipCode("6000", "PH")
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if weatherData == nil || forecastData == nil {
-		t.Error("ERROR")
+	if openweatherData == nil || forecast == nil {
+		t.Error("Must not be nil")
 	}
 
-	t.Log(weatherData)
-	t.Log(forecastData)
+	t.Log(w.WeatherData)
+	t.Log(f.ForecastData)
 }
