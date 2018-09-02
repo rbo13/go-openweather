@@ -166,3 +166,19 @@ func TestGetDailyForecastByCityID(t *testing.T) {
 
 	t.Log(dailyForecastData)
 }
+
+func TestGetDailyForecastByCoordinates(t *testing.T) {
+	client := openweather.NewClient(apiKey)
+
+	dailyForecastData, err := client.GetDailyForecastByCoordinates(openweather.Coordinates{Latitude: 35, Longitude: 139}, "")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if dailyForecastData == nil {
+		t.Error("Daily Forecast Data is nil")
+	}
+
+	t.Log(dailyForecastData)
+}

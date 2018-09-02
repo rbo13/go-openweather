@@ -209,6 +209,28 @@ func (c *Client) GetDailyForecastByCityID(cityID, count string) (*DailyForecastD
 	return &dailyForecastData, nil
 }
 
+// GetDailyForecastByCoordinates returns the
+// daily forecast by a given city id and count/frequency
+// of the forecast. Sets default value to count if
+// none is specified.
+func (c *Client) GetDailyForecastByCoordinates(coords Coordinates, count string) (*DailyForecastData, error) {
+	var dailyForecastData DailyForecastData
+
+	if count == "" {
+		count = "16" // defaults to 16 days of forecast
+	}
+
+	apiURL := fmt.Sprintf(baseURL+"/forecast/daily?lat=%g&lon=%g&cnt=%s&appid=%s", coords.Latitude, coords.Longitude, count, c.apiKey)
+
+	err := c.request("GET", apiURL, &dailyForecastData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &dailyForecastData, nil
+}
+
 func (c *Client) request(method, url string, data interface{}) error {
 
 	resp, err := c.buildHTTPRequest(method, url)
